@@ -17,6 +17,18 @@ SERVER_PORT = args.port
 BUFFER_SIZE = 1024 * 128
 SEPARATOR = "<sep>"
 
+
+print("""
+              _          _____         _______ 
+             | |        |  __ \     /\|__   __|
+  _ __   ___ | |_ __ _  | |__) |   /  \  | |   
+ | '_ \ / _ \| __/ _` | |  _  /   / /\ \ | |   
+ | | | | (_) | || (_| | | | \ \  / ____ \| |   
+ |_| |_|\___/ \__\__,_| |_|  \_\/_/    \_\_|                                                
+     not ransomware v 1.0 | fluffydolphin                             
+""")
+
+
 s = socket.socket()
 
 s.bind((SERVER_HOST, SERVER_PORT))
