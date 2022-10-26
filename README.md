@@ -62,3 +62,7 @@ These commands are for after you have started nota-RAT and adjusted the behaviou
 
 * exit
 * * quits the script
+* /sendfile
+** can send a file from the DIR that the script was run from
+* /getfile
+** can get a file from the current DIR of the reverse shell
