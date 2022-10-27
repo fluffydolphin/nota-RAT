@@ -37,9 +37,9 @@ Cloning using git.
    cd RAT
    ```
    
-3. Run command for either server, client or bot
+3. Run command for either server or RAT
    ```sh
-   python3 server
+   sudo python3 server (you have to run as sudo or as admin or else the /getfile and /sendfile commands will not work)
    ```
    ```sh
    python3 RAT
