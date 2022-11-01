@@ -3,6 +3,10 @@
 ## What is nota-RAT?
 nota-RAT is basically a reverse shell using sockets (for connections) in python that can run pretty much all cli commands in Linux, Windows and MacOS (but has only been properly tested in Ubuntu Linux and Windows 10, 11).
 
+1. The RAT binds sockets together so that the attacker can connect.
+2. after you connect as the attacker you can run pretty much any cli command
+3. When a command is send it uses Fernet for end to end encryption
+
 ## Features
 * Encryption
 ** nota-RAT uses the python library Fernet for encryption
@@ -10,10 +14,6 @@ nota-RAT is basically a reverse shell using sockets (for connections) in python 
 * Discord webhooks
 ** nota-RAT uses the pythom library discord_webhook for discord web hooks
 ** The web hooks display the IP of the victim and shows the avg ping of the connection
-
-1. The RAT binds sockets together so that the attacker can connect.
-2. after you connect as the attacker you can run pretty much any cli command
-3. When a command is send it uses Fernet for end to end encryption
 
 ## How to install and run?
 
