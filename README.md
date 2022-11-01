@@ -1,13 +1,19 @@
 # nota-RAT - Simple reverse shell with python using encryption
 
 ## What is nota-RAT?
-nota-RAT is basically a reverse shell using sockets (for connections) and Fernet (for encryption) and in python that can run pretty much all cli commands in Linux, Windows and MacOS (but has only been properly tested in Ubuntu Linux and Windows 10, 11).
+nota-RAT is basically a reverse shell using sockets (for connections) in python that can run pretty much all cli commands in Linux, Windows and MacOS (but has only been properly tested in Ubuntu Linux and Windows 10, 11).
+
+## Features
+* Encryption
+** nota-RAT uses the python library Fernet for encryption
+** Fernet uses AES in CBC mode with a 128-bit key for encryption; using PKCS7 padding
+* Discord webhooks
+** nota-RAT uses the pythom library discord_webhook for discord web hooks
+** The web hooks display the IP of the victim and shows the avg ping of the connection
 
 1. The RAT binds sockets together so that the attacker can connect.
 2. after you connect as the attacker you can run pretty much any cli command
 3. When a command is send it uses Fernet for end to end encryption
-
-Fernet uses AES in CBC mode with a 128-bit key for encryption; using PKCS7 padding
 
 ## How to install and run?
 
@@ -17,9 +23,7 @@ How to install git for cloning
    ```sh
    sudo apt install git
    ```
-
-
-
+   
 Cloning using git.
 
 1. Clone the repo
