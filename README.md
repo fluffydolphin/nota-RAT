@@ -9,11 +9,11 @@ nota-RAT is basically a reverse shell using sockets (for connections) in python 
 
 ## Features
 * Encryption
-** nota-RAT uses the python library Fernet for encryption
-** Fernet uses AES in CBC mode with a 128-bit key for encryption; using PKCS7 padding
+* * nota-RAT uses the python library Fernet for encryption
+* * Fernet uses AES in CBC mode with a 128-bit key for encryption; using PKCS7 padding
 * Discord webhooks
-** nota-RAT uses the pythom library discord_webhook for discord web hooks
-** The web hooks display the IP of the victim and shows the avg ping of the connection
+* * nota-RAT uses the pythom library discord_webhook for discord web hooks
+* * The web hooks display the IP of the victim and shows the avg ping of the connection
 
 ## How to install and run?
 
@@ -70,6 +70,6 @@ These commands are for after you have started nota-RAT and adjusted the behaviou
 * exit
 * * quits the script
 * /sendfile
-** can send a file from the DIR that the script was run from
+* * can send a file from the DIR that the script was run from
 * /getfile
-** can get a file from the current DIR of the reverse shell
+* * can get a file from the current DIR of the reverse shell
