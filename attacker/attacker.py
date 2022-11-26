@@ -138,7 +138,7 @@ while True:
             filename = Fernet(key).encrypt(filenames.encode())
             client_socket.send(filename)
             remaining = int.from_bytes(client_socket.recv(4),'big')
-            f = open(f"./files/{filenames}","wb")
+            f = open(f"./files/{filenames}","wb+")
             while remaining:
                 data = client_socket.recv(min(remaining,4096))
                 remaining -= len(data)
