@@ -38,8 +38,8 @@ while True:
                 s.send(data)
             f.close()
     if command == "/sendfile":
-        filename = s.recv(1024)
-        filename = Fernet(key).decrypt(filename).decode("utf-8")
+        filename = s.recv(BUFFER_SIZE)
+        filename = Fernet(key).decrypt(filename).decode()
         remaining = int.from_bytes(s.recv(4),'big')
         f = open(filename,"wb")
         while remaining:

