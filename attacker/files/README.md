@@ -1,0 +1,1 @@
+This is where the /sendfile and /getfile are stored and taken from.
