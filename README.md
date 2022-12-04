@@ -20,7 +20,7 @@ nota-RAT is basically a reverse shell using sockets (for connections) in python 
 * Live feed
 * * nota-RAT uses the vidstream library to get a live feed of the victim's screen
 * Wifi
-* * Using netsh not-malware can get all ssids and security keys that the victim has connected to
+* * Using netsh not-RAT can get all ssids and security keys that the victim has connected to
 
 ## How to install and run?
    
