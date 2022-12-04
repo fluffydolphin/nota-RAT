@@ -1,7 +1,7 @@
 # nota-RAT - Simple reverse shell with python using encryption
 
 ## What is nota-RAT?
-nota-RAT is basically a reverse shell using sockets (for connections) in python that can run pretty much all cli commands in Linux, Windows and MacOS (but has only been properly tested in Ubuntu Linux and Windows 10, 11).
+nota-RAT is basically a reverse shell using sockets (for connections) in python for windows 10+.
 
 1. The RAT binds sockets together so that the attacker can connect.
 2. after you connect as the attacker you can run pretty much any cli command
