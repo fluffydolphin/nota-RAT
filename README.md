@@ -4,8 +4,9 @@
 nota-RAT is basically a reverse shell using sockets in python for windows 10+.
 
 1. The RAT binds sockets together so that the attacker can connect.
-2. after you connect as the attacker you can run pretty much any cli command
-3. When a command is send it uses Fernet for end to end encryption
+2. Then it will ask wether you want to enable OTP, if so then you put in the required info then you get a qrcode to scan in your OTP app
+3. after you connect as the attacker you can run pretty much any cli command
+4. When a command is send it uses Fernet for end to end encryption
 
 ## Features
 * Encryption
@@ -21,6 +22,8 @@ nota-RAT is basically a reverse shell using sockets in python for windows 10+.
 * * nota-RAT uses the vidstream library to get a live feed of the victim's screen
 * Wifi
 * * Using netsh not-RAT can get all ssids and security keys that the victim has connected to
+* OTP
+* * nota-RAT can be used with OTP to have a level of authentication
 
 ## How to install and run?
    
