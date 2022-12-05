@@ -22,6 +22,8 @@ nota-RAT is basically a reverse shell using sockets in python for windows 10+.
 * * nota-RAT uses the vidstream library to get a live feed of the victim's screen
 * Wifi
 * * Using netsh not-RAT can get all ssids and security keys that the victim has connected to
+* OTP
+* * nota-RAT can be used with OTP to have a level of authentication
 
 ## How to install and run?
    
