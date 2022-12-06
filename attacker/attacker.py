@@ -1,5 +1,5 @@
 import socket, argparse, subprocess, re, time, os, pyotp, maskpass, qrcode
-from sys import platforml
+from sys import platform
 from threading import Thread
 from PIL import Image
 from cryptography.fernet import Fernet
