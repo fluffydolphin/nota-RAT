@@ -176,10 +176,10 @@ while True:
                 time.sleep(0.4)
                 exit_choice = input(f"[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
             if exit_choice == "y":
-                command = "/stoplive"
-                command = Fernet(key).encrypt(command.encode())
-                client_socket.send(command)
                 if n == 1:
+                    command = "/stoplive"
+                    command = Fernet(key).encrypt(command.encode())
+                    client_socket.send(command)
                     receiver.stop_server()
                 if args.discord:
                     webhook = DiscordWebhook(url=args.discord, content='@everyone')
@@ -370,10 +370,10 @@ while True:
             time.sleep(0.4)
             exit_choice = input(f"\n[{IMPORTANT}] Are you sure you want to exit (y/n)? {END} ")
         if exit_choice == "y":
-            command = "/stoplive"
-            command = Fernet(key).encrypt(command.encode())
-            client_socket.send(command)
             if n == 1:
+                command = "/stoplive"
+                command = Fernet(key).encrypt(command.encode())
+                client_socket.send(command)
                 receiver.stop_server()
             if args.discord:
                 webhook = DiscordWebhook(url=args.discord, content='@everyone')
