@@ -27,7 +27,6 @@ SERVER_HOST = "0.0.0.0"
 SERVER_PORT = args.port
 BUFFER_SIZE = 1024 * 128
 SEPARATOR = "<sep>"
-receiver = StreamingServer(IPAddr, 423)
 key = b'fXpsGp9mJFfNYCTtGeB2zpY9bzjPAoaC0Fkcc13COy4='
 
 
@@ -323,6 +322,9 @@ while True:
         if command == "/getlive":
             n = 1
             from vidstream import StreamingServer
+            if n = 2
+                receiver = StreamingServer(IPAddr, 422)
+            else: receiver = StreamingServer(IPAddr, 423)
             server_location = client_socket.recv(BUFFER_SIZE)
             server_location = Fernet(key).decrypt(server_location).decode()
             if server_location == "no":
@@ -346,7 +348,7 @@ while True:
             print(f"[{IMPORTANT}] {server_state}")
             continue
         if command == "/stoplive":
-            n = 0
+            n = 2
             receiver.stop_server()
             receiver = StreamingServer(IPAddr, 422)
             continue
