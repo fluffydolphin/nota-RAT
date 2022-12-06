@@ -86,8 +86,8 @@ These commands are for after you have started nota-RAT and adjusted the behaviou
 * * Gets a file from the victim's CWD and puts it into the files directory.
 * /getwifi                   
 * * Gets SSIDs and security keys from victim's PC.
-* /OTP
-* * Allows you to enable or disable OTP
+* /config
+* * Allows you to change the config file
 * /clear                     
 * * Clear screen.
 * /exit/quit/q               
