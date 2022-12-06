@@ -322,7 +322,7 @@ while True:
         if command == "/getlive":
             n = 1
             from vidstream import StreamingServer
-            if n == 2
+            if n == 2:
                 receiver = StreamingServer(IPAddr, 422)
             else: receiver = StreamingServer(IPAddr, 423)
             server_location = client_socket.recv(BUFFER_SIZE)
