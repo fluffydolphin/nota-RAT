@@ -71,12 +71,12 @@ if 'config.txt' in os.listdir():
     otp, discord = f.split('\n')
     cringe, otp = otp.split('=')
     cringe, discord = discord.split('=')
-    if discord == "no": print(f"[{INFO}] Discord webhook disabled\n")
-    else: print(f"[{INFO}] Discord webhook enabled\n")
+    if discord == "no": print(f"    [{INFO}] Discord webhook disabled\n")
+    else: print(f"    [{INFO}] Discord webhook enabled\n")
     if otp == "no": 
-        print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
+        print(f"    [{INFO}] OTP disabled\n")
     else:
-        pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+        pwd = maskpass.askpass(prompt=f"\n[{INPUT}] Enter code: ", mask="*")
         totp = pyotp.TOTP(otp)
         totp_verify = totp.verify(pwd)
 
@@ -239,73 +239,83 @@ while True:
         {END}''')
             continue
         if command == "/config":
+            print(f'\n[{GREEN}Shell{END}] Configuration\n')
+            print(f"[{IMPORTANT}] 1) OTP\n[{IMPORTANT}] 2) Discord\n")
+            response = str(input(f"[{INPUT}] What do you want to configure (1/2)? "))
+            while(response != "1" and response != "2"):
+                print(f"[{FAILED}] (1/2) \n{END}")
+                time.sleep(0.4)
+                response = input(f"[{INPUT}] What do you want to configure (1/2)? ")
             with open('config.txt', 'w') as f:
-                if discord == "no":
-                    data = input(f"\n[{IMPORTANT}] Do you want to enable a Discord webhook (y/n)? ")
-                    while(data != "y" and data != "n"):
-                            print(f"[{FAILED}] (y/n) \n{END}")
-                            time.sleep(0.4)
-                            data = input(f"\n[{IMPORTANT}] Do you want to enable a Discord webhook (y/n)? ")
-                    if data == "n":
-                        print(f"\n[{INFO}] Discord webhook disabled\n")
-                        discord_answer = 'discord=no'
-                        discord = "no"
-                    if data == "y":
-                        discord_webhook = input(f"[{IMPORTANT}] Discord webhook URI? ")
-                        discord_answer = f"discord={discord_webhook}"
-                        discord = discord_webhook
-                else:
-                    data = input(f"\n[{INFO}] Do you want to disable a Discord webhook (y/n)? ")
-                    while(data != "y" and data != "n"):
-                            print(f"[{FAILED}] (y/n) \n{END}")
-                            time.sleep(0.4)
-                            data = input(f"\n[{IMPORTANT}] Do you want to disable a Discord webhook (y/n)? ")
-                    if data == "n":
-                        pass
-                    if data == "y":
-                        print(f"\n[{IMPORTANT}] Discord webhook disabled\n")
-                        discord_answer = 'discord=no'
-                        discord = "no"
-                if  otp == "no":
-                    data = input(f"\n[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
-                    while(data != "y" and data != "n"):
-                            print(f"[{FAILED}] (y/n) \n{END}")
-                            time.sleep(0.4)
-                            data = input(f"\n[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
-                    if data == "n":
-                        print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
-                        otp_answer = "OTP=no\n"
-                    if data == "y":
-                        uri_name = input(f"[{IMPORTANT}] TOTP name? ")
-                        uri_issuer_name = input(f"[{IMPORTANT}] TOTP issuer name? ")
-                        secret_key = input(f"[{IMPORTANT}] TOTP secret key? ")
-                        uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=uri_name, issuer_name=uri_issuer_name)
-                        img = qrcode.make(uri)
-                        img.save('nota-RAT_qrcode.png')
-                        otp_answer = f"OTP={secret_key}\n"
-                        print(f"\n[{INFO}] Authentication URI: {uri}")
-                        print(f"\n[{INFO}] Successfully generated qrcode")
-                        imgs = Image.open('nota-RAT_qrcode.png')
-                        imgs.show()
-                        pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
-                        totp = pyotp.TOTP(secret_key)
-                        totp_verify = totp.verify(pwd)
-                        if totp_verify != True:
-                            print(f"[{INFO}] Incorrect\n")
-                            exit()
-                        print(f"[{INFO}] Correct\n")
-                else: 
-                    data = data = input(f"\n[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
-                    while(data != "y" and data != "n"):
-                            print(f"[{FAILED}] (y/n) \n{END}")
-                            time.sleep(0.4)
-                            data = data = input(f"\n[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
-                    if data == "n":
-                        pass
-                    if data == "y":
-                        print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
-                        otp_answer = "OTP=no\n"
-                        os.remove("nota-RAT_qrcode.png")
+                if response == "2":
+                    otp_answer = f"OTP={otp}\n"
+                    if discord == "no":
+                        data = input(f"\n[{IMPORTANT}] Do you want to enable a Discord webhook (y/n)? ")
+                        while(data != "y" and data != "n"):
+                                print(f"[{FAILED}] (y/n) \n{END}")
+                                time.sleep(0.4)
+                                data = input(f"\n[{IMPORTANT}] Do you want to enable a Discord webhook (y/n)? ")
+                        if data == "n":
+                            print(f"\n[{INFO}] Discord webhook disabled\n")
+                            discord_answer = 'discord=no'
+                            discord = "no"
+                        if data == "y":
+                            discord_webhook = input(f"[{IMPORTANT}] Discord webhook URI? ")
+                            discord_answer = f"discord={discord_webhook}"
+                    else:
+                        data = input(f"\n[{INFO}] Do you want to disable a Discord webhook (y/n)? ")
+                        while(data != "y" and data != "n"):
+                                print(f"[{FAILED}] (y/n) \n{END}")
+                                time.sleep(0.4)
+                                data = input(f"\n[{IMPORTANT}] Do you want to disable a Discord webhook (y/n)? ")
+                        if data == "n":
+                            pass
+                        if data == "y":
+                            print(f"\n[{IMPORTANT}] Discord webhook disabled\n")
+                            discord_answer = 'discord=no'
+                            discord = "no"
+                if response == "1":
+                    discord_answer = f"discord={discord}"
+                    if  otp == "no":
+                        data = input(f"\n[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+                        while(data != "y" and data != "n"):
+                                print(f"[{FAILED}] (y/n) \n{END}")
+                                time.sleep(0.4)
+                                data = input(f"\n[{IMPORTANT}] Do you want to enable OTP (y/n)? ")
+                        if data == "n":
+                            print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
+                            otp_answer = "OTP=no\n"
+                        if data == "y":
+                            uri_name = input(f"[{IMPORTANT}] TOTP name? ")
+                            uri_issuer_name = input(f"[{IMPORTANT}] TOTP issuer name? ")
+                            secret_key = input(f"[{IMPORTANT}] TOTP secret key? ")
+                            uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=uri_name, issuer_name=uri_issuer_name)
+                            img = qrcode.make(uri)
+                            img.save('nota-RAT_qrcode.png')
+                            otp_answer = f"OTP={secret_key}\n"
+                            print(f"\n[{INFO}] Authentication URI: {uri}")
+                            print(f"\n[{INFO}] Successfully generated qrcode")
+                            imgs = Image.open('nota-RAT_qrcode.png')
+                            imgs.show()
+                            pwd = maskpass.askpass(prompt=f"\n[{IMPORTANT}] Enter code: ", mask="*")
+                            totp = pyotp.TOTP(secret_key)
+                            totp_verify = totp.verify(pwd)
+                            if totp_verify != True:
+                                print(f"[{INFO}] Incorrect\n")
+                                exit()
+                            print(f"[{INFO}] Correct\n")
+                    else: 
+                        data = data = input(f"\n[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
+                        while(data != "y" and data != "n"):
+                                print(f"[{FAILED}] (y/n) \n{END}")
+                                time.sleep(0.4)
+                                data = data = input(f"\n[{IMPORTANT}] Do you want to disable OTP (y/n)? ")
+                        if data == "n":
+                            pass
+                        if data == "y":
+                            print(f"\n[{IMPORTANT}] It is recommended to enable OTP\n")
+                            otp_answer = "OTP=no\n"
+                            os.remove("nota-RAT_qrcode.png")
                 to_write = [otp_answer, discord_answer]
                 f.writelines(to_write)
                 discord = discord_answer
