@@ -1,4 +1,4 @@
-import os, subprocess, socket, time, re, sys
+import os, subprocess, socket, time, sys
 from cryptography.fernet import Fernet
 
 

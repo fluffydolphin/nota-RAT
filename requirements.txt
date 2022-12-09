@@ -1,0 +1,6 @@
+pyotp
+maskpass
+qrcode
+pillow
+cryptography
+discord_webhook
