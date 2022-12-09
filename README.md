@@ -20,8 +20,6 @@ nota-RAT is basically a reverse shell using sockets in python for windows 10+.
 * * This can we used to send additional malware to the victim's PC
 * Live feed
 * * nota-RAT uses the vidstream library to get a live feed of the victim's screen
-* Wifi
-* * Using netsh not-RAT can get all ssids and security keys that the victim has connected to
 * OTP
 * * nota-RAT can be used with OTP to have a level of authentication
 
@@ -84,8 +82,6 @@ These commands are for after you have started nota-RAT and adjusted the behaviou
 * * Sends a file from the files directory in the victom's CWD directory.
 * /getfile                   
 * * Gets a file from the victim's CWD and puts it into the files directory.
-* /getwifi                   
-* * Gets SSIDs and security keys from victim's PC.
 * /config
 * * Allows you to change the config file
 * /clear                     
