@@ -30,6 +30,7 @@ Cloning using git.
 1. Clone the repo
    ```sh
    git clone https://github.com/fluffydolphin/not-RAT.git
+   pip install -r requirements.txt
    ```
    
 2. cd into not-RAT
